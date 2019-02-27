@@ -1,0 +1,10 @@
+# idea env
+.idea/*
+.idea
+
+# deploy tmp
+.deploy_git
+
+# node_modules
+node_modules/*
+node_modules
