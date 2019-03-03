@@ -79,5 +79,5 @@ theme: next
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: https://github.com/flowingcloud516/flowingcloud516.github.io.git
-  branch: published
+  repo: git@github.com:flowingcloud516/flowingcloud516.github.io.git
+  branch: master

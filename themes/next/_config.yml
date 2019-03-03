@@ -92,13 +92,12 @@ index_with_subtitle: false
 # Value before `||` delimeter is the target link.
 # Value after `||` delimeter is the name of FontAwesome icon. If icon (with or without delimeter) is not specified, question icon will be loaded.
 menu:
-  home: / || home
-  #about: /about/ || user
-  #tags: /tags/ || tags
+  Home: / || home
   #categories: /categories/ || th
-  archives: /archives/ || archive
+  Archives: /archives/ || archive
+#  Sitemap: /sitemap.xml || sitemap
+  AboutMe: /aboutme/ || user
   #schedule: /schedule/ || calendar
-  #sitemap: /sitemap.xml || sitemap
   #commonweal: /404/ || heartbeat
 
 # Enable/Disable menu icons.
@@ -112,8 +111,8 @@ menu_icons:
 
 # Schemes
 #scheme: Muse
-#scheme: Mist
-scheme: Pisces
+scheme: Mist
+#scheme: Pisces
 #scheme: Gemini
 
 
@@ -154,7 +153,7 @@ links_layout: block
 # Sidebar Avatar
 # in theme directory(source/images): /images/avatar.gif
 # in site  directory(source/uploads): /uploads/avatar.gif
-#avatar: /images/avatar.gif
+avatar: /uploads/sadaharu.jpg
 
 # Table Of Contents in the Sidebar
 toc:
@@ -182,7 +181,7 @@ sidebar:
   #  - always  expand for all pages automatically
   #  - hide    expand only when click on the sidebar toggle icon.
   #  - remove  Totally remove sidebar including sidebar toggle.
-  display: post
+  display: hide
   #display: always
   #display: hide
   #display: remove
@@ -489,7 +488,7 @@ duoshuo_info:
   ua_enable: true
   admin_enable: false
   user_id: 0
-  #admin_nickname: Author
+#  admin_nickname: 打不shi的流云
 
 # Post widgets & FB/VK comments settings.
 # ---------------------------------------------------------------
@@ -619,7 +618,7 @@ local_search:
 # External URL with BASE64 encrypt & decrypt.
 # Usage: {% exturl text url "title" %}
 # Alias: {% extlink text url "title" %}
-exturl: false
+exturl: true
 
 # Note tag (bs-callout).
 note:
