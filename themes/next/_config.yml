@@ -102,7 +102,7 @@ menu:
   Categories: /categories/ || th
   Tags: /tags/ || tag
   AboutMe: /aboutme/ || user
-  #schedule: /schedule/ || calendar
+#  schedule: /schedule/ || calendar
 #  commonweal: /404/ || heartbeat
 
 # Enable/Disable menu icons.
@@ -364,7 +364,7 @@ han: false
 
 # Disqus
 disqus:
-  enable: true
+  enable: false
   shortname: flowingcloud516
   count: true
 
