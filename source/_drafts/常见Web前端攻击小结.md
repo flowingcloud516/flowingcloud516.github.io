@@ -34,3 +34,4 @@ SELECT * FROM `MyTable` WHERE `id`="1" OR TRUE
 #### _References_:
 - [1]: [Web安全入门之常见攻击](https://zhuanlan.zhihu.com/p/23309154)
 - [2]: [防止SQL注入的5种方法](https://my.oschina.net/MiniBu/blog/270521)
+- [3]: [前端安全系列（一）：如何防止XSS攻击](https://tech.meituan.com/2018/09/27/fe-security.html)
