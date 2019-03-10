@@ -27,10 +27,14 @@ override: false
 # For example, you put your favicons into `hexo-site/source/images` directory.
 # Then need to rename & redefine they on any other names, otherwise icons from Next will rewrite your custom icons in Hexo.
 favicon:
-  small: /images/favicon-16x16-next.png
-  medium: /images/favicon-32x32-next.png
-  apple_touch_icon: /images/apple-touch-icon-next.png
-  safari_pinned_tab: /images/logo.svg
+#  small: /images/favicon-16x16-next.png
+#  medium: /images/favicon-32x32-next.png
+#  apple_touch_icon: /images/apple-touch-icon-next.png
+#  safari_pinned_tab: /images/logo.svg
+  small: /images/origin_noback.png
+  medium: /images/origin_noback.png
+  apple_touch_icon: /images/origin_noback.png
+  safari_pinned_tab: /images/no_background.svg
   #android_manifest: /images/manifest.json
   #ms_browserconfig: /images/browserconfig.xml
 
@@ -93,13 +97,13 @@ index_with_subtitle: false
 # Value after `||` delimeter is the name of FontAwesome icon. If icon (with or without delimeter) is not specified, question icon will be loaded.
 menu:
   Home: / || home
-  #categories: /categories/ || th
   Archives: /archives/ || archive
 #  Sitemap: /sitemap.xml || sitemap
+  Categories: /categories/ || th
   Tags: /tags/ || tag
   AboutMe: /aboutme/ || user
   #schedule: /schedule/ || calendar
-  #commonweal: /404/ || heartbeat
+#  commonweal: /404/ || heartbeat
 
 # Enable/Disable menu icons.
 menu_icons:
@@ -360,8 +364,8 @@ han: false
 
 # Disqus
 disqus:
-  enable: false
-  shortname:
+  enable: true
+  shortname: flowingcloud516
   count: true
 
 # Hypercomments
@@ -465,7 +469,7 @@ needmoreshare2:
 #google_site_verification:
 
 # Google Analytics
-#google_analytics:
+google_analytics: UA-135964112-1
 
 # Bing Webmaster tools verification setting
 # See: https://www.bing.com/webmaster/
@@ -531,9 +535,10 @@ rating:
 # Show number of visitors to each article.
 # You can visit https://leancloud.cn get AppID and AppKey.
 leancloud_visitors:
-  enable: false
-  app_id: #<app_id>
-  app_key: #<app_key>
+  enable: true
+  app_id: k8BXQFr62egK9QiKCbkKXwY2-gzGzoHsz
+  app_key: AnYv9GdhoosYmbVMlP7FONam
+#  账号： github 登录 flowingcloud516
 
 # Another tool to show number of visitors to each article.
 # visit https://console.firebase.google.com/u/0/ to get apiKey and projectId
@@ -562,6 +567,7 @@ busuanzi_count:
   page_pv: true
   page_pv_header: <i class="fa fa-file-o"></i>
   page_pv_footer:
+
 
 
 # Tencent analytics ID
