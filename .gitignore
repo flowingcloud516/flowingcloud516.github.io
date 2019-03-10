@@ -4,6 +4,10 @@
 
 # deploy tmp
 .deploy_git
+public/*
+public/
+.garbage/*
+.garbage/
 
 # node_modules
 node_modules/*
