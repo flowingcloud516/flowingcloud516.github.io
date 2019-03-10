@@ -364,9 +364,9 @@ han: false
 
 # Disqus
 disqus:
-  enable: false
+  enable: true
   shortname: flowingcloud516
-  count: true
+  count: false
 
 # Hypercomments
 #hypercomments_id:
