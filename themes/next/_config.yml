@@ -96,6 +96,7 @@ menu:
   #categories: /categories/ || th
   Archives: /archives/ || archive
 #  Sitemap: /sitemap.xml || sitemap
+  Tags: /tags/ || tag
   AboutMe: /aboutme/ || user
   #schedule: /schedule/ || calendar
   #commonweal: /404/ || heartbeat
@@ -193,10 +194,10 @@ sidebar:
   b2t: false
 
   # Scroll percent label in b2t button.
-  scrollpercent: false
+  scrollpercent: true
 
   # Enable sidebar on narrow view (only for Muse | Mist).
-  onmobile: false
+  onmobile: true
 
 
 # ---------------------------------------------------------------
@@ -215,7 +216,7 @@ excerpt_description: true
 # Automatically Excerpt. Not recommend.
 # Please use <!-- more --> in the post to control excerpt accurately.
 auto_excerpt:
-  enable: false
+  enable: true
   length: 150
 
 # Post meta display settings
