@@ -13,6 +13,7 @@ NexT 主题优化相关
 1. [Hexo NexT 使用中的小细节](https://jan9th.github.io/2017/04/22/Hexo-NexT-%E4%BD%BF%E7%94%A8%E4%B8%AD%E7%9A%84%E5%B0%8F%E7
 %BB%86%E8%8A%82/)
 1. [Hexo博客NexT模板配置之记录](https://yumuzi.github.io/hexo-next-theme.html)
+1. [HEXO-NEXT主题个性化配置](http://mashirosorata.vicp.io/HEXO-NEXT%E4%B8%BB%E9%A2%98%E4%B8%AA%E6%80%A7%E5%8C%96%E9%85%8D%E7%BD%AE.html)
 
 
 <div id="disqus_thread"></div>
