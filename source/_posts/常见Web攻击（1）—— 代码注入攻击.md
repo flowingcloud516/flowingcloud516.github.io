@@ -87,7 +87,7 @@ HTTP 响应截断攻击是用在 HTTP 首部注入的一种攻击。攻击顺序
 
 常见 Web 攻击手段还有一些，比如跨站点请求伪造（Cross-Site Request Forgeries, CSRF），之后会对此进行介绍，并比较它和跨站脚本攻击 XSS 之间的异同。
 
-#### _References_:
+### _References_:
 - [1]: [Web安全入门之常见攻击](https://zhuanlan.zhihu.com/p/23309154)
 - [2]: [防止SQL注入的5种方法](https://my.oschina.net/MiniBu/blog/270521)
 - [3]: [前端安全系列（一）：如何防止XSS攻击](https://tech.meituan.com/2018/09/27/fe-security.html)
