@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/origin_noback.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/origin_noback.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/origin_noback.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/no_background.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="http,web,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="从安全的角度来看，Http协议具有以下特点：  单纯Http在协议层面不具备必要的安全功能 在客户端可篡改Http请求，使得攻击更容易实现     因此，在对外提供Http服务时，要保持不信任用户输入的原则，谨慎防范可能发生的Http攻击。在此小结一下比较常见的代码注入类Web攻击，以及对应的防范方法。 所谓代码注入众所周知，程序是由代码编译后，交给计算机执行。如果能 1)直接修改代码，将攻击逻辑">
+<meta name="keywords" content="http,web">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见Web攻击（1）—— 代码注入攻击">
+<meta property="og:url" content="http://flowingcloud516.github.io/2019/04/20/常见Web攻击（1）—— 代码注入攻击/index.html">
+<meta property="og:site_name" content="流云-Blog">
+<meta property="og:description" content="从安全的角度来看，Http协议具有以下特点：  单纯Http在协议层面不具备必要的安全功能 在客户端可篡改Http请求，使得攻击更容易实现     因此，在对外提供Http服务时，要保持不信任用户输入的原则，谨慎防范可能发生的Http攻击。在此小结一下比较常见的代码注入类Web攻击，以及对应的防范方法。 所谓代码注入众所周知，程序是由代码编译后，交给计算机执行。如果能 1)直接修改代码，将攻击逻辑">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://flowingcloud516.github.io/images/blog/web/xss-dynamic_webpage.png">
+<meta property="og:updated_time" content="2020-04-13T16:21:09.557Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="常见Web攻击（1）—— 代码注入攻击">
+<meta name="twitter:description" content="从安全的角度来看，Http协议具有以下特点：  单纯Http在协议层面不具备必要的安全功能 在客户端可篡改Http请求，使得攻击更容易实现     因此，在对外提供Http服务时，要保持不信任用户输入的原则，谨慎防范可能发生的Http攻击。在此小结一下比较常见的代码注入类Web攻击，以及对应的防范方法。 所谓代码注入众所周知，程序是由代码编译后，交给计算机执行。如果能 1)直接修改代码，将攻击逻辑">
+<meta name="twitter:image" content="http://flowingcloud516.github.io/images/blog/web/xss-dynamic_webpage.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":10,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://flowingcloud516.github.io/2019/04/20/常见Web攻击（1）—— 代码注入攻击/">
+
+
+
+
+
+  <title>常见Web攻击（1）—— 代码注入攻击 | 流云-Blog</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-135964112-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">流云-Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tag"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-aboutme">
+          <a href="/aboutme/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            AboutMe
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://flowingcloud516.github.io/2019/04/20/常见Web攻击（1）—— 代码注入攻击/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="流云">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/sadaharu.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="流云-Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">常见Web攻击（1）—— 代码注入攻击</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-04-20T22:07:22+08:00">
+                2019-04-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web前端/" itemprop="url" rel="index">
+                    <span itemprop="name">Web前端</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2019/04/20/常见Web攻击（1）—— 代码注入攻击/" class="leancloud_visitors" data-flag-title="常见Web攻击（1）—— 代码注入攻击">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Visitors&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>从安全的角度来看，Http协议具有以下特点：</p>
+<ul>
+<li>单纯Http在协议层面不具备必要的安全功能</li>
+<li>在客户端可篡改Http请求，使得攻击更容易实现   </li>
+</ul>
+<p>因此，在对外提供Http服务时，要保持不信任用户输入的原则，谨慎防范可能发生的Http攻击。<br>在此小结一下比较常见的代码注入类Web攻击，以及对应的防范方法。</p>
+<h3 id="所谓代码注入"><a href="#所谓代码注入" class="headerlink" title="所谓代码注入"></a>所谓代码注入</h3><p>众所周知，程序是由代码编译后，交给计算机执行。如果能 1)直接修改代码，将攻击逻辑注入，而 2)计算机不去验证代码的权限，依旧会执行此类具有攻击逻辑的代码。由此，攻击行为完成。此类攻击主要有 SQL/OS脚本<br>注入、跨站脚本攻击（XSS攻击）、HTTP首部注入</p>
+<h3 id="1-SQL-注入"><a href="#1-SQL-注入" class="headerlink" title="1. SQL 注入"></a>1. SQL 注入</h3><p>SQL注入，指将前端通过表单或输入提交，将部分SQL命令注入到后端执行SQL中，达到修改后端逻辑目的的一种攻击方式。通常发生在后端SQL拼接时未对前端传入参数进行校验过滤的场景。</p>
+<h5 id="SQL-注入原理"><a href="#SQL-注入原理" class="headerlink" title="SQL 注入原理"></a>SQL 注入原理</h5><p>如后端有SQL如下，需要前端传入一个 <code>id</code> 值，以进行信息查询：<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`MyTable`</span> <span class="keyword">WHERE</span> <span class="string">`id`</span>=<span class="string">"&#123;0&#125;"</span></span><br></pre></td></tr></table></figure></p>
+<p>而此时，如果前端传入 <code>1&quot; OR TRUE</code>。后端没有校验便传入参数值并对SQL进行拼接。那么直接拼接的SQL为：<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`MyTable`</span> <span class="keyword">WHERE</span> <span class="string">`id`</span>=<span class="string">"1"</span> <span class="keyword">OR</span> <span class="literal">TRUE</span></span><br></pre></td></tr></table></figure></p>
+<p>此时将所有数据全部取出。如果后端SQL是<code>DELETE</code>，影响更是不可估量。</p>
+<h5 id="SQL-注入的防范"><a href="#SQL-注入的防范" class="headerlink" title="SQL 注入的防范"></a>SQL 注入的防范</h5><p>防范思路主要有2种：<strong>1. 参数校验（前端或后端进行）</strong>；<strong>2.SQL预编译，后传参</strong>。<br>首先我们要确立一个原则，即<code>不信任任何用户输入信息</code>。尤其是用户输入的 Plain Text。因为我们不知道用户是什么水平，他们输入的信息对我们的系统是否会造成巨大伤害。<br>在此理念的指导下，对于用户提交的输入信息，我们需要进行充分的校验，避免其对后端服务系统造成攻击。相关手段可以是 正则式检验参数合法性、html元素校验、SQL元素校验等，并且可以在前端/后端执行。<br>如果校验逻辑在前端执行，确实不会对后端性能造成影响，但对于有经验的攻击者，可以修改前端js代码，此屏障就形同虚设；而如果在后端进行校验，多少会损耗后端性能，如果校验算法比较复杂耗时，也许又会成为攻击者的另一个攻击点。</p>
+<h5 id="SQL-预编译"><a href="#SQL-预编译" class="headerlink" title="SQL 预编译"></a>SQL 预编译</h5><p>MySQL 提供 <code>prepare</code>语句，使用户可以传入一个SQL模板，而后续传入参数作为纯粹的String值进行处理。另外，MyBatis 中，如果 SQL 如下书写，也可以使用预编译的方式传递SQL：<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> MyTable <span class="keyword">WHERE</span> <span class="string">`id`</span>=<span class="comment">#&#123;id&#125;</span></span><br></pre></td></tr></table></figure></p>
+<p>此文不对此进行展开。详情可参考 [5] [6] 。</p>
+<h3 id="2-OS-命令注入"><a href="#2-OS-命令注入" class="headerlink" title="2. OS 命令注入"></a>2. OS 命令注入</h3><p>该类和SQL代码注入类似，不同在于拼接的命令是SQL还是Bash。防御方案可采用校验法，即在命令执行之前，校验用户输入是否合法。<br>针对此类攻击，目前笔者没有找到类似SQL预编译的解决方案。由此可见，根据用户输入信息，来拼接具体执行功能的代码，是多么不明智的举动。</p>
+<h3 id="3-XSS-跨站脚本攻击"><a href="#3-XSS-跨站脚本攻击" class="headerlink" title="3. XSS 跨站脚本攻击"></a>3. XSS 跨站脚本攻击</h3><p>全称跨站脚本攻击（Cross-Site Scripting, XSS），是指通过存在安全漏洞的Web网站注册用户的浏览器内，运行非法HTML标签或JS代码的一种攻击方式。<br>定义是从[4]抄下来的，看着很眼晕啊，我们用两个栗子来解释一下。   </p>
+<h5 id="输入HTML-JS代码进行攻击"><a href="#输入HTML-JS代码进行攻击" class="headerlink" title="输入HTML/JS代码进行攻击"></a>输入HTML/JS代码进行攻击</h5><p>在用户输入时，如果前端不进行校验，用户可能输入一些非法html、甚至是 JS 代码，来达到攻击的目的。如<br><img src="/images/blog/web/xss-dynamic_webpage.png" alt="image" title="用户输入 &lt; s &gt; 标签，更改页面逻辑（图来自参考资料4，侵删）"><br>又或者，页面<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">value</span>=<span class="string">"&lt;%= getParameter("</span><span class="attr">keyword</span>") %&gt;</span>"&gt;</span><br><span class="line"><span class="tag">&lt;<span class="name">button</span>&gt;</span>搜索<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">  您搜索的关键词是：<span class="tag">&lt;<span class="name">%=</span> <span class="attr">getParameter</span>("<span class="attr">keyword</span>") %&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>而用户输入为 <code>&quot;&gt;&lt;script&gt;alert(&#39;XSS&#39;);&lt;/script&gt;</code>。经过拼接，html 将执行 <code>alert(&#39;XSS&#39;)</code>。<br>XSS 攻击详见参考资料[2]。</p>
+<h3 id="4-Http-首部注入"><a href="#4-Http-首部注入" class="headerlink" title="4. Http 首部注入"></a>4. Http 首部注入</h3><p>HTTP 首部注入攻击(HTTP Header Injection)是指攻击者通过在响应首部字段内插入换行,添加任意响应首部或主体的一种攻击。   </p>
+<h5 id="HTTP-首部注入"><a href="#HTTP-首部注入" class="headerlink" title="HTTP 首部注入"></a>HTTP 首部注入</h5><p>如以下首部，Web 应用有时会把从外部接收到的数值,赋给响应首部字段 Location 和 Set-Cookie：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Location: http://www.example.com/a.cgi?q=12345</span><br><span class="line">Set-Cookie: UID=12345</span><br></pre></td></tr></table></figure></p>
+<p>用户本应输入 12345，却在后面加入了 <code>%0D%0A</code> （代表 HTTP 报文中的换行符），使请求接收方会执行 <code>Set-Cookie</code> 操作。HTTP 首部注入攻击有可能会造成以下一些影响：</p>
+<ol>
+<li>设置任何 Cookie 信息</li>
+<li>重定向至任意 URL</li>
+<li>显示任意的主体(HTTP 响应截断攻击)</li>
+</ol>
+<h5 id="HTTP-响应截断"><a href="#HTTP-响应截断" class="headerlink" title="HTTP 响应截断"></a>HTTP 响应截断</h5><p>HTTP 响应截断攻击是用在 HTTP 首部注入的一种攻击。攻击顺序相同,但是要将两个 <code>%0D%0A%0D%0A</code> 并排插入字符串后发送。利用这两个连续的换行就可作出 HTTP 首部与主体分隔所需的空行了,这样就能显示伪造的主体,达到攻击目的。这样的攻<br>击叫做 HTTP 响应截断攻击。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%0D%0A%0D%0A<span class="tag">&lt;<span class="name">HTML</span>&gt;</span><span class="tag">&lt;<span class="name">HEAD</span>&gt;</span><span class="tag">&lt;<span class="name">TITLE</span>&gt;</span>之后,想要显示的网页内容 ..</span><br></pre></td></tr></table></figure></p>
+<p>常见 Web 攻击手段还有一些，比如跨站点请求伪造（Cross-Site Request Forgeries, CSRF），之后会对此进行介绍，并比较它和跨站脚本攻击 XSS 之间的异同。</p>
+<h3 id="References"><a href="#References" class="headerlink" title="References:"></a><em>References</em>:</h3><ul>
+<li>[1]: <a href="https://zhuanlan.zhihu.com/p/23309154" target="_blank" rel="noopener">Web安全入门之常见攻击</a></li>
+<li>[2]: <a href="https://my.oschina.net/MiniBu/blog/270521" target="_blank" rel="noopener">防止SQL注入的5种方法</a></li>
+<li>[3]: <a href="https://tech.meituan.com/2018/09/27/fe-security.html" target="_blank" rel="noopener">前端安全系列（一）：如何防止XSS攻击</a></li>
+<li>[4]: 《图解HTTP》 上野宣(日) 著 于均良 译</li>
+<li>[5]: <a href="https://www.cnblogs.com/geaozhang/p/9891338.html" target="_blank" rel="noopener">MySQL的SQL预处理（Prepared）</a></li>
+<li>[6]: <a href="http://www.mybatis.org/mybatis-3/zh/sqlmap-xml.html#Parameters" target="_blank" rel="noopener">mybatis官方文档——参数</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/http/" rel="tag"># http</a>
+          
+            <a href="/tags/web/" rel="tag"># web</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/10/重温《乌龙》看霍光/" rel="next" title="重温《乌龙》看霍光">
+                <i class="fa fa-chevron-left"></i> 重温《乌龙》看霍光
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/20/Leetcode-901-Outline-Stock-Span/" rel="prev" title="Leetcode_901-Outline Stock Span">
+                Leetcode_901-Outline Stock Span <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/uploads/sadaharu.jpg" alt="流云">
+            
+              <p class="site-author-name" itemprop="name">流云</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#所谓代码注入"><span class="nav-number">1.</span> <span class="nav-text">所谓代码注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-SQL-注入"><span class="nav-number">2.</span> <span class="nav-text">1. SQL 注入</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#SQL-注入原理"><span class="nav-number">2.0.1.</span> <span class="nav-text">SQL 注入原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SQL-注入的防范"><span class="nav-number">2.0.2.</span> <span class="nav-text">SQL 注入的防范</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SQL-预编译"><span class="nav-number">2.0.3.</span> <span class="nav-text">SQL 预编译</span></a></li></ol></li></ol><li class="nav-item nav-level-3"><a class="nav-link" href="#2-OS-命令注入"><span class="nav-number">3.</span> <span class="nav-text">2. OS 命令注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-XSS-跨站脚本攻击"><span class="nav-number">4.</span> <span class="nav-text">3. XSS 跨站脚本攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#输入HTML-JS代码进行攻击"><span class="nav-number">4.0.1.</span> <span class="nav-text">输入HTML/JS代码进行攻击</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Http-首部注入"><span class="nav-number">5.</span> <span class="nav-text">4. Http 首部注入</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#HTTP-首部注入"><span class="nav-number">5.0.1.</span> <span class="nav-text">HTTP 首部注入</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#HTTP-响应截断"><span class="nav-number">5.0.2.</span> <span class="nav-text">HTTP 响应截断</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References:</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">流云</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://flowingcloud516.github.io/2019/04/20/常见Web攻击（1）—— 代码注入攻击/';
+          this.page.identifier = '2019/04/20/常见Web攻击（1）—— 代码注入攻击/';
+          this.page.title = '常见Web攻击（1）—— 代码注入攻击';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://flowingcloud516.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("k8BXQFr62egK9QiKCbkKXwY2-gzGzoHsz", "AnYv9GdhoosYmbVMlP7FONam");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/exturl.js?v=5.1.4"></script>
+
+
+</body>
+</html>

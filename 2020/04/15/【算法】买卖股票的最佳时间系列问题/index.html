@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/origin_noback.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/origin_noback.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/origin_noback.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/no_background.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="题目简述买卖股票系列问题是LeetCode上一个很经典的系列问题，简单场景甚至只需要一次遍历求极值即可，而复杂场景则需要应用到动态规划思想去求解。  问题核心：给与某支股票若干天内的价格序列，问如何买卖股票能获得最大收益？ 问题场景：该系列问题一共有6个场景，分别有不同的买卖操作要求和限制，具体如下：     LeetCode题目序号 题目 要点概述     121 买卖股票的最佳时机 一次买卖，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【算法】买卖股票的最佳时间系列问题">
+<meta property="og:url" content="http://flowingcloud516.github.io/2020/04/15/【算法】买卖股票的最佳时间系列问题/index.html">
+<meta property="og:site_name" content="流云-Blog">
+<meta property="og:description" content="题目简述买卖股票系列问题是LeetCode上一个很经典的系列问题，简单场景甚至只需要一次遍历求极值即可，而复杂场景则需要应用到动态规划思想去求解。  问题核心：给与某支股票若干天内的价格序列，问如何买卖股票能获得最大收益？ 问题场景：该系列问题一共有6个场景，分别有不同的买卖操作要求和限制，具体如下：     LeetCode题目序号 题目 要点概述     121 买卖股票的最佳时机 一次买卖，">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://flowingcloud516.github.io/images/blog/algorithm/stock-status-hold.jpg">
+<meta property="og:image" content="http://flowingcloud516.github.io/images/blog/algorithm/stock-status-nothold.jpg">
+<meta property="og:updated_time" content="2020-04-15T15:12:24.963Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【算法】买卖股票的最佳时间系列问题">
+<meta name="twitter:description" content="题目简述买卖股票系列问题是LeetCode上一个很经典的系列问题，简单场景甚至只需要一次遍历求极值即可，而复杂场景则需要应用到动态规划思想去求解。  问题核心：给与某支股票若干天内的价格序列，问如何买卖股票能获得最大收益？ 问题场景：该系列问题一共有6个场景，分别有不同的买卖操作要求和限制，具体如下：     LeetCode题目序号 题目 要点概述     121 买卖股票的最佳时机 一次买卖，">
+<meta name="twitter:image" content="http://flowingcloud516.github.io/images/blog/algorithm/stock-status-hold.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":10,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://flowingcloud516.github.io/2020/04/15/【算法】买卖股票的最佳时间系列问题/">
+
+
+
+
+
+  <title>【算法】买卖股票的最佳时间系列问题 | 流云-Blog</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-135964112-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">流云-Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tag"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-aboutme">
+          <a href="/aboutme/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            AboutMe
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://flowingcloud516.github.io/2020/04/15/【算法】买卖股票的最佳时间系列问题/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="流云">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/sadaharu.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="流云-Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">【算法】买卖股票的最佳时间系列问题</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-04-15T23:06:49+08:00">
+                2020-04-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2020/04/15/【算法】买卖股票的最佳时间系列问题/" class="leancloud_visitors" data-flag-title="【算法】买卖股票的最佳时间系列问题">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Visitors&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="题目简述"><a href="#题目简述" class="headerlink" title="题目简述"></a>题目简述</h3><p>买卖股票系列问题是LeetCode上一个很经典的系列问题，简单场景甚至只需要一次遍历求极值即可，而复杂场景则需要应用到动态规划思想去求解。</p>
+<ol>
+<li>问题核心：给与某支股票若干天内的价格序列，问如何买卖股票能获得最大收益？</li>
+<li>问题场景：该系列问题一共有6个场景，分别有不同的买卖操作要求和限制，具体如下：</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">LeetCode题目序号</th>
+<th style="text-align:left">题目</th>
+<th style="text-align:left">要点概述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">121</td>
+<td style="text-align:left"><a href="https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/" target="_blank" rel="noopener">买卖股票的最佳时机</a></td>
+<td style="text-align:left">一次买卖，取最大利润</td>
+</tr>
+<tr>
+<td style="text-align:left">122</td>
+<td style="text-align:left"><a href="https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii/" target="_blank" rel="noopener">买卖股票的最佳时机 II</a></td>
+<td style="text-align:left">不限买卖次数</td>
+</tr>
+<tr>
+<td style="text-align:left">714</td>
+<td style="text-align:left"><a href="https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/" target="_blank" rel="noopener">买卖股票的最佳时机-含手续费</a></td>
+<td style="text-align:left">不限买卖次数，但是每次卖出股票需要付手续费</td>
+</tr>
+<tr>
+<td style="text-align:left">309</td>
+<td style="text-align:left"><a href="https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/" target="_blank" rel="noopener">买卖股票的最佳时机-含冷冻期</a></td>
+<td style="text-align:left">不限买卖次数，但是每次卖出需要等1天才能再次买入</td>
+</tr>
+<tr>
+<td style="text-align:left">123</td>
+<td style="text-align:left"><a href="https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iii/" target="_blank" rel="noopener">买卖股票的最佳时机 III</a></td>
+<td style="text-align:left">最多买卖2次</td>
+</tr>
+<tr>
+<td style="text-align:left">188</td>
+<td style="text-align:left"><a href="https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iv/" target="_blank" rel="noopener">买卖股票的最佳时机 IV</a></td>
+<td style="text-align:left">最多买卖 k 次</td>
+</tr>
+</tbody>
+</table>
+<h3 id="DP-思路解析"><a href="#DP-思路解析" class="headerlink" title="DP 思路解析"></a>DP 思路解析</h3><p>本题中需要对数据的操作有2种：买入和卖出。如果将状态分为 “持有股票” 和 “不持有股票”，则状态转化就被大大简化了。<br>具体如下：<br><img src="/images/blog/algorithm/stock-status-hold.jpg" alt="“持有股票” 状态转移"></p>
+<p>对于持有股票的收益，它由2种状态转移过来：</p>
+<ol>
+<li>前一天就持有股票，则集成它的收益</li>
+<li>前一天不持有股票，则需要按前一天不持有股票的收益状态减去当前股票价格，可以理解为按今天的价格买入股票；如果在场景一，即只买卖一次的情况下，则只能由 0 收益转移过来，实际上是筛选成本最低的状态。</li>
+</ol>
+<p><img src="/images/blog/algorithm/stock-status-nothold.jpg" alt="“不持有股票” 状态转移"></p>
+<p>对于不持有股票的收益，它也由2种状态转移过来：</p>
+<ol>
+<li>前一天持有股票，今天卖出股票，则可以按照当天股价进行收益</li>
+<li>前一天也不持有股票，则收益继承</li>
+</ol>
+<h3 id="基本型：一次买卖"><a href="#基本型：一次买卖" class="headerlink" title="基本型：一次买卖"></a>基本型：一次买卖</h3><h5 id="题目分析"><a href="#题目分析" class="headerlink" title="题目分析"></a>题目分析</h5><p>此场景下，其实不需要动态规划，只需要遍历 prices 数组时，记录之前的股票最低价，然后计算收益。因为不能先卖再买，所以不用算后面出现的更低价。</p>
+<p>但是此篇讨论这种解法不是我们的目的，我们的目的是为了更容易理解后续变种的解法，所以尝试用DP的思想来解这道题。</p>
+<h5 id="状态转移方程"><a href="#状态转移方程" class="headerlink" title="状态转移方程"></a>状态转移方程</h5><p>直接给出状态转移方程式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> Hold(i)   = Max&#123; Hold(i-1),    0 - prices[i] &#125;</span><br><span class="line">NotHold(i) = Max&#123; NotHold(i-1), Hold(i-1) + prices[i] &#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><strong>Hold 函数</strong> 表示第 i 天时，手上持有股票所累积的收益，或者说<strong>成本</strong>。它由 2 种状态转移过来：<ul>
+<li>情况 1： 前一天已经持有股票，这时直接继承前一天的收益（或成本）</li>
+<li>情况 2： 今天买入股票，那么成本为 -prices[i]</li>
+</ul>
+</li>
+<li><strong>NotHold 函数</strong> 表示第 i 天时，手上不持有股票所积累的收益。它也由 2 种状态转移过来：<ul>
+<li>情况 1： 前一天没有持有股票，则收益继承；</li>
+<li>情况 2： 将前一天的股票卖出，收益为 prices[i] - Hold(i-1)</li>
+</ul>
+</li>
+</ul>
+<p>本质上，Hold 函数是用于计算第 i 天之前，<strong>股票最低价格是多少</strong>；而 NotHold 函数则用于计算如果今天卖出股票，可以收益多少钱。</p>
+<h5 id="填表过程"><a href="#填表过程" class="headerlink" title="填表过程"></a>填表过程</h5><p>以股价 [7， 1， 5， 3， 6， 4] 为例：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">天数</th>
+<th style="text-align:left">股价</th>
+<th style="text-align:left">Hold</th>
+<th style="text-align:left">NotHold</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">7</td>
+<td style="text-align:left">-7</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">Max{ Hold(1), 0 - prices[2] } <br> = Max{ -7, 0 - 1 } <br> = -1</td>
+<td style="text-align:left">Max{ NotHold(1), Hold(1) + prices[2] } <br> = Max{ 0, 1 + (-7) } <br> = 0</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">5</td>
+<td style="text-align:left">Max{ Hold(2), 0 - prices[3] } <br> = Max{ -1, 0 - 5 } <br> = -1</td>
+<td style="text-align:left">Max{ NotHold(2), Hold(2) + prices[3] } <br> = Max{ 0, 5 + (-1) } <br> = 4</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">Max{ Hold(3), 0 - prices[4] } <br> = Max{ -1, 0 - 3 } <br> = -1</td>
+<td style="text-align:left">Max{ NotHold(3), Hold(3) + prices[4] } <br> = Max{ 4, 3 + (-1) } <br> = 4</td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">Max{ Hold(4), 0 - prices[5] } <br> = Max{ -1, 0 - 6 } <br> = -1</td>
+<td style="text-align:left">Max{ NotHold(4), Hold(4) + prices[5] } <br> = Max{ 4, 6 + (-1) } <br> = 5</td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">4</td>
+<td style="text-align:left">Max{ Hold(5), 0 - prices[6] } <br> = Max{ -1, 0 - 4 } <br> = -1</td>
+<td style="text-align:left">Max{ NotHold(5), Hold(5) + prices[6] } <br> = Max{ 5, 4 + (-1) } <br> = 5</td>
+</tr>
+</tbody>
+</table>
+<p>可以看到，NotHold(6) 的结果为 5，表示第 6 天不持有股票（已经卖出）的最大收益为 5。</p>
+<h5 id="其他分析"><a href="#其他分析" class="headerlink" title="其他分析"></a>其他分析</h5><ul>
+<li>Question：为什么 NotHold 第二个状态的由来是 Hold(i-1) + prices[i] ？</li>
+<li>Answer：第二个状态表示<strong>今天以prices[i]的价格卖出股票</strong>，而 Hold(i-1) 表示前一天持有股票的最大收益（成本最小）</li>
+</ul>
+<p><em>P.S. 其实这个 “只进行一次买卖” 的场景下，Hold 函数其实就是找到成本最低的那一天进行买入。</em></p>
+<h3 id="理想量化交易：不限买卖次数"><a href="#理想量化交易：不限买卖次数" class="headerlink" title="理想量化交易：不限买卖次数"></a>理想量化交易：不限买卖次数</h3><h5 id="题目分析-1"><a href="#题目分析-1" class="headerlink" title="题目分析"></a>题目分析</h5><p>此场景不限制交易次数，意味着只要找到每次涨跌的极值，进行扣除计算，就能算出最大利润。但是这种算法依然不是本篇讨论的重点。</p>
+<p>在 DP 思路的框架下，对于 Hold 函数，如果由 <strong>情况2</strong>（今天才买入股票）转移过来，则它的收益应该是<strong>昨天未持有股票的收益，扣除今天买入股票的成本</strong>。</p>
+<p><strong>CAUTION</strong>：这个场景是 DP 思路的关键；理解了这个场景，后续的难度拔高就好得多。</p>
+<h5 id="状态转移方程-1"><a href="#状态转移方程-1" class="headerlink" title="状态转移方程"></a>状态转移方程</h5><p>同样，直接给出状态转移方程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> Hold(i)   = Max&#123; Hold(i-1),    NotHold(i-1) - prices[i] &#125;</span><br><span class="line">NotHold(i) = Max&#123; NotHold(i-1), Hold(i-1) + prices[i] &#125;</span><br></pre></td></tr></table></figure></p>
+<p>为什么 Hold 函数可以从 NotHold(i-1) - prices[i] 转移来？如果减去当天的估价，讲道理不是肯定会比 Hold(i-1) 低么，状态不就被无脑抹去了么？</p>
+<p>需要了解，如果 Hold 从 NotHold(i-1) 转移过来，那么 NotHold(i-1) 是否已经将 Hold(i-2) 的利益收割了？比如下面这种情况（假设最初股票为1元）：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">天数</th>
+<th style="text-align:left">股价</th>
+<th style="text-align:left">Hold</th>
+<th style="text-align:left">NotHold</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">-1</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">-1 <br>（继续持有）</td>
+<td style="text-align:left">2 <br>（卖出股票，收割 2 元）</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">0 <br> （由 NotHold(2) 转移过来，已经将收割的 2 元计算进来了）</td>
+<td style="text-align:left">2 <br> （虽然按今天的估价卖出能赚 1 元，但显然不如昨天卖出股票收益大）</td>
+</tr>
+</tbody>
+</table>
+<h5 id="填表过程-1"><a href="#填表过程-1" class="headerlink" title="填表过程"></a>填表过程</h5><p>依然以股价 [7， 1， 5， 3， 6， 4] 为例：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">天数</th>
+<th style="text-align:left">股价</th>
+<th style="text-align:left">Hold</th>
+<th style="text-align:left">NotHold</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">7</td>
+<td style="text-align:left">-7</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">Max{ Hold(1), NotHold(1) - prices[2] } <br> = Max{ -7, 0 - 1 } <br> = -1 <br> （今天买入更划算）</td>
+<td style="text-align:left">Max{ NotHold(1), Hold(1) + prices[2] } <br> = Max{ 0, 1 + (-7) } <br> = 0 <br> （昨天买今天卖还亏了6块，不如空仓）</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">5</td>
+<td style="text-align:left">Max{ Hold(2), NotHold(2) - prices[3] } <br> = Max{ -1, 0 - 5 } <br> = -1 <br> （昨天空仓今天再买入，花了5块，不如昨天1元买入，今天继续按昨天的成本持有）</td>
+<td style="text-align:left">Max{ NotHold(2), Hold(2) + prices[3] } <br> = Max{ 0, 5 + (-1) } <br> = 4 <br> (昨天1元买入，今天5元卖出，肯定比持续空仓划算)</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">Max{ Hold(3), NotHold(3) - prices[4] } <br> = Max{ -1, 4 - 3 } <br> = 1 <br> （前天1元买入，收益为-1；如果昨天卖了一手，今天再买，收益为1了）</td>
+<td style="text-align:left">Max{ NotHold(3), Hold(3) + prices[4] } <br> = Max{ 4, 3 + (-1) } <br> = 4 <br> （如果按前天1元的成本买入，今天3块卖出，赚2块；但是昨天5块卖出，今天保持空仓，收益为4块）</td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">Max{ Hold(4), NotHold(4) - prices[5] } <br> = Max{ 1, 4 - 6 } <br> = 1 <br> （按昨天收益继续持有，还是昨天卖出今天重新买入？显然保持昨天收益更高）</td>
+<td style="text-align:left">Max{ NotHold(4), Hold(4) + prices[5] } <br> = Max{ 4, 6 + 1 } <br> = 7 <br> （昨天持仓的收益为1，按照今天的价格卖出能再赚6块）</td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">4</td>
+<td style="text-align:left">Max{ Hold(5), NotHold(5) - prices[6] } <br> = Max{ 1, 7 - 4 } <br> = 3</td>
+<td style="text-align:left">Max{ NotHold(5), Hold(5) + prices[6] } <br> = Max{ 7, 1 + 4 } <br> = 5</td>
+</tr>
+</tbody>
+</table>
+<h3 id="现实量化交易：不限买卖次数，但是每次卖出需要收手续费"><a href="#现实量化交易：不限买卖次数，但是每次卖出需要收手续费" class="headerlink" title="现实量化交易：不限买卖次数，但是每次卖出需要收手续费"></a>现实量化交易：不限买卖次数，但是每次卖出需要收手续费</h3><h5 id="题目分析-2"><a href="#题目分析-2" class="headerlink" title="题目分析"></a>题目分析</h5><p>此种场景既是上一种变形的升级版，也是<strong>为什么一定要用 DP 思想来解这道题的原因</strong>。之前两种场景，无论是只进行1次交易，或者不限制交易次数，采用最大值、递增子序列等方法都能完成题目的解答。但是从这种场景开始，初阶解法在股票买卖场景中变得不适用了。</p>
+<p>来聊聊解法吧。可以发现，在不限制交易的场景中，把状态方程稍作变更，就能解这道题了。具体的，在 NotHold 函数中，如果今天决定将股票卖出，那么我们再扣除一部分固定的交易费即可。</p>
+<h5 id="状态转移方程-2"><a href="#状态转移方程-2" class="headerlink" title="状态转移方程"></a>状态转移方程</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> Hold(i)   = Max&#123; Hold(i-1),    NotHold(i-1) - prices[i] &#125;</span><br><span class="line">NotHold(i) = Max&#123; NotHold(i-1), Hold(i-1) + prices[i] - fee &#125;</span><br></pre></td></tr></table></figure>
+<p>变更很简单，其实就是不限交易场景中，每次卖出股票再交一笔费用。</p>
+<h5 id="填表过程-2"><a href="#填表过程-2" class="headerlink" title="填表过程"></a>填表过程</h5><p>以股价 [1, 3, 2, 8, 4, 9] ，交易费为 2 为例</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">天数</th>
+<th style="text-align:left">股价</th>
+<th style="text-align:left">Hold</th>
+<th style="text-align:left">NotHold</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">-1</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">Max{ Hold(1), NotHold(1) - prices[2] } <br> = Max{ -1, 0 - 3 } <br> = -1</td>
+<td style="text-align:left">Max{ NotHold(1), Hold(1) + prices[2] - fee } <br> = Max{ 0, 3 + (-1) - 2 } <br> = 0</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">Max{ Hold(2), NotHold(2) - prices[3] } <br> = Max{ -1, 0 - 2 } <br> = -1</td>
+<td style="text-align:left">Max{ NotHold(2), Hold(2) + prices[3] - fee } <br> = Max{ 0, 2 + (-1) - 2} <br> = 0</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">8</td>
+<td style="text-align:left">Max{ Hold(3), NotHold(3) - prices[4] } <br> = Max{ -1, 0 - 8 } <br> = -1</td>
+<td style="text-align:left">Max{ NotHold(3), Hold(3) + prices[4] - fee } <br> = Max{ 0, 8 + (-1) - 2} <br> = 5</td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">4</td>
+<td style="text-align:left">Max{ Hold(4), NotHold(4) - prices[5] } <br> = Max{ -1, 5 - 4 } <br> = 1</td>
+<td style="text-align:left">Max{ NotHold(4), Hold(4) + prices[5] - fee } <br> = Max{ 5, 4 + (-1) - 2} <br> = 5</td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">9</td>
+<td style="text-align:left">Max{ Hold(5), NotHold(5) - prices[6] } <br> = Max{ 1, 5 - 9 } <br> = 1</td>
+<td style="text-align:left">Max{ NotHold(5), Hold(5) + prices[6] - fee } <br> = Max{ 5, 9 + 1 - 2} <br> = 8</td>
+</tr>
+</tbody>
+</table>
+<p>因此，最大收益为 8.</p>
+<h3 id="风险控制型：卖出后-1-天有冷冻期"><a href="#风险控制型：卖出后-1-天有冷冻期" class="headerlink" title="风险控制型：卖出后 1 天有冷冻期"></a>风险控制型：卖出后 1 天有冷冻期</h3><h5 id="题目分析-3"><a href="#题目分析-3" class="headerlink" title="题目分析"></a>题目分析</h5><p>此场景和上面2种场景很相似，具体处理在 Hold 函数的状态转移时，取<strong>前天</strong>的 NotHold 值，而不是取昨天的。</p>
+<h5 id="状态转移方程-3"><a href="#状态转移方程-3" class="headerlink" title="状态转移方程"></a>状态转移方程</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> Hold(i)   = Max&#123; Hold(i-1),    NotHold(i-2) - prices[i] &#125;</span><br><span class="line">NotHold(i) = Max&#123; NotHold(i-1), Hold(i-1) + prices[i] &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="自律型：只买卖-2-次-只买卖-k-次"><a href="#自律型：只买卖-2-次-只买卖-k-次" class="headerlink" title="自律型：只买卖 2 次 / 只买卖 k 次"></a>自律型：只买卖 2 次 / 只买卖 k 次</h3><h5 id="题目分析-4"><a href="#题目分析-4" class="headerlink" title="题目分析"></a>题目分析</h5><p>这两种场景在状态转移上差别不大。看起来限制交易 2次的场景比 k次场景更简单，但如果用 DP 的思想求解，其实是一致的。<br><em>P.S. 如果不用DP，暴力求解，2次场景是能过的</em></p>
+<p>需要注意的有3点：</p>
+<ol>
+<li>由于限制了最大交易次数，所以需要记录以前发生了多少次交易</li>
+<li>很有可能最大利润<strong>不需要完成最大交易次数</strong></li>
+<li>由于买需要1天，卖需要1天，所以最大交易次数其实为 prices.length / 2</li>
+</ol>
+<h5 id="状态转移方程-4"><a href="#状态转移方程-4" class="headerlink" title="状态转移方程"></a>状态转移方程</h5><p>由于限制了最大交易次数，需要记录已经发生的交易次数，这一点需要体现在状态转移方程中。</p>
+<p>具体的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> Hold(k, i)   = Max&#123; Hold(k, i-1),    NotHold(k - 1, i-1) - prices[i] &#125;</span><br><span class="line">NotHold(k, i) = Max&#123; NotHold(k, i-1), Hold(k, i-1) + prices[i] &#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们增加一个 k 变量到 Hold 和 NotHold 中，表示：</p>
+<ul>
+<li>Hold(k, i)：   第 i 天，已经交易 k 次（包括今天买入这一次），持有股票的最大利润；它的转移情况：<ul>
+<li>情况 1： 前一天已经持有股票，这时直接继承前一天的收益（或成本），此时交易次数 k 不变</li>
+<li>情况 2： 今天买入股票，那么收益为昨天不持有股票的状态减去今天的估价，并且昨天的交易次数是 k - 1</li>
+</ul>
+</li>
+<li>NotHold(k, i)：第 i 天，已经交易 k 次（如果今天卖出，其实交易次数不变），持有股票的最大利润<ul>
+<li>情况 1： 前一天没有持有股票，继承昨天收益，且交易次数 k 不变；</li>
+<li>情况 2： 按今天股价将股票卖出，收益为 prices[i] - Hold(k, i-1)；由于<strong>买卖算作一次完整交易</strong>，故交易次数 k 不变</li>
+</ul>
+</li>
+</ul>
+<h5 id="填表过程-3"><a href="#填表过程-3" class="headerlink" title="填表过程"></a>填表过程</h5><p>以股价 [3, 2, 6, 5, 0, 3]，最大交易次数 k = 2 为例</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">天数</th>
+<th style="text-align:left">股价</th>
+<th style="text-align:left">Hold(0, i)</th>
+<th style="text-align:left">NotHold(0, i)</th>
+<th style="text-align:left">Hold(1, i)</th>
+<th style="text-align:left">NotHold(1, i)</th>
+<th style="text-align:left">Hold(2, i)</th>
+<th style="text-align:left">NotHold(2, i)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">-3</td>
+<td style="text-align:left">-∞</td>
+<td style="text-align:left">-∞</td>
+<td style="text-align:left">-∞</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">Max{-3, 0 - 2} <br> = -2</td>
+<td style="text-align:left">Max{0, -∞ + (-3)} <br> = 0</td>
+<td style="text-align:left">-∞ <br> (当前第2天，不可能开始进行第 2 次交易)</td>
+<td style="text-align:left">-∞ <br> (当前第2天，不可能开始进行第 2 次交易)</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">Max{-2, 0 - 6} <br> = -2</td>
+<td style="text-align:left">Max{0, 6 + (-2)} <br> = 4</td>
+<td style="text-align:left">Max{-∞, 0 - 6} <br> = -6</td>
+<td style="text-align:left">-∞ <br> (当前第3天，不可能开始进行第 2 次，且能卖出股票)</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">5</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">Max{-2, 0 - 5} <br> = -2</td>
+<td style="text-align:left">Max{4, 5 + (-2)} <br> = 4</td>
+<td style="text-align:left">Max{-6, 4 - 5} <br> = -1</td>
+<td style="text-align:left">Max{-∞, 5 + (-6)} <br> = -1</td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">Max{-2, 0 - 0} <br> = 0</td>
+<td style="text-align:left">Max{4, 0 + (-2)} <br> = 4</td>
+<td style="text-align:left">Max{-1, 4 - 0} <br> = 4</td>
+<td style="text-align:left">Max{-1, 0 + -1} <br> = -1</td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">Max{0, 0 - 3} <br> = 0</td>
+<td style="text-align:left">Max{4, 3 + (-0)} <br> = 4</td>
+<td style="text-align:left">Max{4, 4 - 3} <br> = 4</td>
+<td style="text-align:left">Max{-1, 3 + 4} <br> = 7</td>
+</tr>
+</tbody>
+</table>
+<p>注意事项：</p>
+<ol>
+<li>Hold(0, 1) 和 NotHold(0, i) 都是无意义的，因为进行 0 次交易，收益永远是 0</li>
+<li>初始化：只有 Hold(1, 0) 需要初始化为 -prices[0]，Hold(k, i)、NotHold(k, i) (k &gt; 1) 最好都初始化为 -∞</li>
+<li>交易合理性：递推的过程中判断当前状态是否可达，比如第 2 天时，最多只可能进行1次交易（第1天买，第2天卖），Hold(2, 2) 是不可达的；同理，第 3 天时，NotHold(2, 3) 也是不可达的</li>
+<li>降维处理：对于 Hold 和 NotHold，它们其实只依赖前一天对应的状态，因此没必要申请一个 days × k 的二维表，相关算法可参考 DP 思路下的斐波拉契数列；其他场景也可进行降维优化，但最大 k 次交易的场景下，如果不进行降维优化，很可能超出内存限制</li>
+</ol>
+<h3 id="References"><a href="#References" class="headerlink" title="References"></a>References</h3><ol>
+<li><a href="https://juejin.im/post/5d88f5366fb9a06afd6644c7" target="_blank" rel="noopener">「leetcode」买卖股票的最佳时机I、II、III、IV、含手续费、含冷冻期</a></li>
+<li><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems" target="_blank" rel="noopener">（英文原文）Most consistent ways of dealing with the series of stock problems</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/04/Kazoo基本使用和原理浅析/" rel="next" title="Kazoo基本使用和原理浅析">
+                <i class="fa fa-chevron-left"></i> Kazoo基本使用和原理浅析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/uploads/sadaharu.jpg" alt="流云">
+            
+              <p class="site-author-name" itemprop="name">流云</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#题目简述"><span class="nav-number">1.</span> <span class="nav-text">题目简述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DP-思路解析"><span class="nav-number">2.</span> <span class="nav-text">DP 思路解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本型：一次买卖"><span class="nav-number">3.</span> <span class="nav-text">基本型：一次买卖</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#题目分析"><span class="nav-number">3.0.1.</span> <span class="nav-text">题目分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#状态转移方程"><span class="nav-number">3.0.2.</span> <span class="nav-text">状态转移方程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#填表过程"><span class="nav-number">3.0.3.</span> <span class="nav-text">填表过程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#其他分析"><span class="nav-number">3.0.4.</span> <span class="nav-text">其他分析</span></a></li></ol></li></ol><li class="nav-item nav-level-3"><a class="nav-link" href="#理想量化交易：不限买卖次数"><span class="nav-number">4.</span> <span class="nav-text">理想量化交易：不限买卖次数</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#题目分析-1"><span class="nav-number">4.0.1.</span> <span class="nav-text">题目分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#状态转移方程-1"><span class="nav-number">4.0.2.</span> <span class="nav-text">状态转移方程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#填表过程-1"><span class="nav-number">4.0.3.</span> <span class="nav-text">填表过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#现实量化交易：不限买卖次数，但是每次卖出需要收手续费"><span class="nav-number">5.</span> <span class="nav-text">现实量化交易：不限买卖次数，但是每次卖出需要收手续费</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#题目分析-2"><span class="nav-number">5.0.1.</span> <span class="nav-text">题目分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#状态转移方程-2"><span class="nav-number">5.0.2.</span> <span class="nav-text">状态转移方程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#填表过程-2"><span class="nav-number">5.0.3.</span> <span class="nav-text">填表过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#风险控制型：卖出后-1-天有冷冻期"><span class="nav-number">6.</span> <span class="nav-text">风险控制型：卖出后 1 天有冷冻期</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#题目分析-3"><span class="nav-number">6.0.1.</span> <span class="nav-text">题目分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#状态转移方程-3"><span class="nav-number">6.0.2.</span> <span class="nav-text">状态转移方程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自律型：只买卖-2-次-只买卖-k-次"><span class="nav-number">7.</span> <span class="nav-text">自律型：只买卖 2 次 / 只买卖 k 次</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#题目分析-4"><span class="nav-number">7.0.1.</span> <span class="nav-text">题目分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#状态转移方程-4"><span class="nav-number">7.0.2.</span> <span class="nav-text">状态转移方程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#填表过程-3"><span class="nav-number">7.0.3.</span> <span class="nav-text">填表过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">流云</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://flowingcloud516.github.io/2020/04/15/【算法】买卖股票的最佳时间系列问题/';
+          this.page.identifier = '2020/04/15/【算法】买卖股票的最佳时间系列问题/';
+          this.page.title = '【算法】买卖股票的最佳时间系列问题';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://flowingcloud516.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("k8BXQFr62egK9QiKCbkKXwY2-gzGzoHsz", "AnYv9GdhoosYmbVMlP7FONam");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/exturl.js?v=5.1.4"></script>
+
+
+</body>
+</html>

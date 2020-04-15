@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/origin_noback.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/origin_noback.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/origin_noback.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/no_background.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,ZooKeeper,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="关于KazooKazoo是一个ZooKeeper的python客户端，它是一个纯python的应用，并在底层实现了与zookeeper通讯协议。 它主要有这些特性  底层通信异步化 基于Python装饰器，提供一次watch、终身受用的功能 提供 gevent/eventlet 兼容功能  其他的ZooKeeper-Python客户端[1]：  txzookeeper 基于Twisted/Pyth">
+<meta name="keywords" content="Python,ZooKeeper">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kazoo基本使用和原理浅析">
+<meta property="og:url" content="http://flowingcloud516.github.io/2019/08/04/Kazoo基本使用和原理浅析/index.html">
+<meta property="og:site_name" content="流云-Blog">
+<meta property="og:description" content="关于KazooKazoo是一个ZooKeeper的python客户端，它是一个纯python的应用，并在底层实现了与zookeeper通讯协议。 它主要有这些特性  底层通信异步化 基于Python装饰器，提供一次watch、终身受用的功能 提供 gevent/eventlet 兼容功能  其他的ZooKeeper-Python客户端[1]：  txzookeeper 基于Twisted/Pyth">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://flowingcloud516.github.io/images/blog/python/kazoo_states.png">
+<meta property="og:image" content="http://flowingcloud516.github.io/images/blog/python/kazoo_struct.png">
+<meta property="og:image" content="http://flowingcloud516.github.io/images/blog/python/kazoo_invoke_flow.png">
+<meta property="og:updated_time" content="2020-04-13T16:21:09.551Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kazoo基本使用和原理浅析">
+<meta name="twitter:description" content="关于KazooKazoo是一个ZooKeeper的python客户端，它是一个纯python的应用，并在底层实现了与zookeeper通讯协议。 它主要有这些特性  底层通信异步化 基于Python装饰器，提供一次watch、终身受用的功能 提供 gevent/eventlet 兼容功能  其他的ZooKeeper-Python客户端[1]：  txzookeeper 基于Twisted/Pyth">
+<meta name="twitter:image" content="http://flowingcloud516.github.io/images/blog/python/kazoo_states.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":10,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://flowingcloud516.github.io/2019/08/04/Kazoo基本使用和原理浅析/">
+
+
+
+
+
+  <title>Kazoo基本使用和原理浅析 | 流云-Blog</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-135964112-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">流云-Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tag"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-aboutme">
+          <a href="/aboutme/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            AboutMe
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://flowingcloud516.github.io/2019/08/04/Kazoo基本使用和原理浅析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="流云">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/sadaharu.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="流云-Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kazoo基本使用和原理浅析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-04T11:02:21+08:00">
+                2019-08-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2019/08/04/Kazoo基本使用和原理浅析/" class="leancloud_visitors" data-flag-title="Kazoo基本使用和原理浅析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Visitors&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="关于Kazoo"><a href="#关于Kazoo" class="headerlink" title="关于Kazoo"></a>关于Kazoo</h3><p>Kazoo是一个ZooKeeper的python客户端，它是一个纯python的应用，并在底层实现了与zookeeper通讯协议。</p>
+<p>它主要有这些特性</p>
+<ul>
+<li>底层通信异步化</li>
+<li>基于Python装饰器，提供一次watch、终身受用的功能</li>
+<li>提供 gevent/eventlet 兼容功能</li>
+</ul>
+<p>其他的ZooKeeper-Python客户端<sup>[1]</sup>：</p>
+<ol>
+<li><strong>txzookeeper</strong> 基于Twisted/Python（对并发部分进行过更改的Python版本），2013年停止维护</li>
+<li><strong>zc.zk</strong> 2014年停止维护，zc.zk2 开始使用 kazoo</li>
+</ol>
+<h3 id="关于本文"><a href="#关于本文" class="headerlink" title="关于本文"></a>关于本文</h3><ol>
+<li>本文基于 kazoo 2.6.1 版本代码进行分析总结。</li>
+<li>本文中提到的“异步结构”，是根据handler选择变化的，在SequentialThreadingHandler中是异步线程，而在SequentialGeventHandler中是异步协程。</li>
+</ol>
+<h3 id="基本使用方式"><a href="#基本使用方式" class="headerlink" title="基本使用方式"></a>基本使用方式</h3><ol>
+<li><p>启动客户端</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">zk = KazooClient(hosts=<span class="string">"127.0.0.1:2181"</span>) </span><br><span class="line"><span class="comment"># can be multi hosts, like</span></span><br><span class="line"><span class="comment"># zk = KazooClient(hosts="192.168.0.1:2181,192.168.0.2:2181,192.168.0.3:2181")</span></span><br><span class="line">zk.start()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>CURD 命令</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Ensure a path, create if necessary</span></span><br><span class="line">zk.ensure_path(<span class="string">"/path/to/my/node"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a node with data</span></span><br><span class="line">zk.create(<span class="string">"/my/favorite/node"</span>, <span class="string">b"a value"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># read api</span></span><br><span class="line">data, stat = zk.get(<span class="string">"/my/favorite"</span>)</span><br><span class="line">children = zk.get_children(<span class="string">"/my/favorite"</span>)</span><br><span class="line"><span class="keyword">if</span> zk.exists(<span class="string">"/my/favorite"</span>):</span><br><span class="line">    <span class="comment"># Do something</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>watch 监听</p>
+</li>
+</ol>
+<ul>
+<li>方式1：采用ZooKeeper提供的默认watch监听事件，可使用的函数：<ul>
+<li>get()</li>
+<li>get_children()</li>
+<li>exists()<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_func</span><span class="params">(event)</span>:</span></span><br><span class="line">    <span class="comment"># check to see what the children are now</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Call my_func when the children change</span></span><br><span class="line">children = zk.get_children(<span class="string">"/my/favorite/node"</span>, watch=my_func)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>方式2：采用kazoo提供的Watch装饰器，可使用的监听器有<ul>
+<li>ChildrenWatch 观察子节点变化</li>
+<li>DataWatch  观察节点值的变化<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@zk.ChildrenWatch("/my/favorite/node")</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">watch_children</span><span class="params">(children)</span>:</span></span><br><span class="line">    print(<span class="string">"Children are now: %s"</span> % children)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<ol start="4">
+<li><p>Retry<br>在kazoo中，重试机制是通过抽象出一个类来进行控制的，这个类就是KazooRetry。KazooRetry实现了<strong>call</strong>函数，因此可以被直接当做函数使用。使用方式如下： </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">result = zk.retry(zk.get, <span class="string">"/path/to/node"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Custom Retries</span></span><br><span class="line">kr = KazooRetry(max_tries=<span class="number">3</span>, ignore_expire=<span class="keyword">False</span>)</span><br><span class="line">result = kr(client.get, <span class="string">"/some/path"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># init client using Retry</span></span><br><span class="line">rt = KazooRetry(max_tries=<span class="number">3</span>, ignore_expire=<span class="keyword">False</span>)</span><br><span class="line">zk = KazooClient(hosts=<span class="string">"127.0.0.1:2181"</span>, connection_retry=rt, command_retry=rt)</span><br><span class="line">zk.start()</span><br></pre></td></tr></table></figure>
+<p> 需要特别指出的是，在KazooRetry中会捕获一种ForceRetryError的异常来触发重试，这个机制被connection用于连接轮询。 </p>
+</li>
+</ol>
+<h3 id="Kazoo-状态转换"><a href="#Kazoo-状态转换" class="headerlink" title="Kazoo 状态转换"></a>Kazoo 状态转换</h3><p><img src="/images/blog/python/kazoo_states.png" alt="image" title="kazoo 状态转换"></p>
+<table>
+<thead>
+<tr>
+<th>Source/Target</th>
+<th>LOST</th>
+<th>CONNECTED</th>
+<th>SUSPEND</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LOST</td>
+<td>客户端初始化即为LOST状态</td>
+<td>成功连接ZK服务端后，转移到CONNECTED</td>
+<td></td>
+</tr>
+<tr>
+<td>CONNECTED</td>
+<td>只有鉴权失败会返回LOST状态</td>
+<td></td>
+<td>ZK Server 出现问题，重连ZK节点，先转移到SUSPEND</td>
+</tr>
+<tr>
+<td>SUSPEND</td>
+<td>重建连接失败，如Session过期</td>
+<td>重建连接成功，且鉴权有效</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="Kazoo-代码原理浅析"><a href="#Kazoo-代码原理浅析" class="headerlink" title="Kazoo 代码原理浅析"></a>Kazoo 代码原理浅析</h3><p>Kazoo底层通信用<strong>异步实现</strong>，但也提供一些同步命令，这些同步命令是在异步基础上增加等待来模拟同步的。</p>
+<p>异步的实现方式可以通过handler类型进行选择。Kazoo提供了3种Handler：SequentialThreadingHandler、SequentialGeventHandler、SequentialEventletHandler，分别用线程、gevent、eventlet的方式来实现异步。</p>
+<p>以下我们将kazoo的主要模块拆开，分别讲解原理，然后通过一个kazoo.get()命令的流程来说明kazoo具体是如何工作的。</p>
+<p><em>P.S. 如果觉得代码太多不想细究，只想理解大致原理，可跳过中间的模块解析部分，只看<strong>模块架构</strong>和<strong>get工作流程</strong>~</em></p>
+<h4 id="模块架构"><a href="#模块架构" class="headerlink" title="模块架构"></a>模块架构</h4><p><img src="/images/blog/python/kazoo_struct.png" alt="image" title="kazoo 模块架构"></p>
+<p>Kazoo 主要有这3大模块：client、异步handler、连接connection，其关系如上图所示。   </p>
+<ol>
+<li>client：管理配置项，并对外提供get、set等操作命令；</li>
+<li>connection：通过handler提供的异步功能，与ZK进行通信，而通信过程会经过kazoo自己实现的serialization方法进行；</li>
+<li>handler：管理异步队列和异步操作，kazoo客户端初始化，后主要有2个异步队列和1个异步结果操作：<ol>
+<li>zk_loop：connection模块通过<strong>异步轮询</strong>的方式与ZK Server进行通信，处理request和response；</li>
+<li>AsyncResult：异步结果，不同的handler有不同的实现，SequentialGeventHandler中直接调用gevent.event.AsyncResult，在SequentialThreadingHandler中kazoo模拟了一个异步请求，并通过completion_queue队列的线程处理异步结果的callback；</li>
+<li>callback_queue：处理watch回调。</li>
+</ol>
+</li>
+</ol>
+<h4 id="Connection"><a href="#Connection" class="headerlink" title="Connection"></a>Connection</h4><p>connection模块中有ConnectionHandler类，用于处理与ZK的异步连接。我们来看看start函数：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""Start the connection up"""</span></span><br><span class="line">    <span class="keyword">if</span> self.connection_closed.is_set():</span><br><span class="line">        rw_sockets = self.handler.create_socket_pair()   <span class="comment"># 调用本地方法</span></span><br><span class="line">        self._read_sock, self._write_sock = rw_sockets   <span class="comment"># 获得一个 socket pair</span></span><br><span class="line">        self.connection_closed.clear()</span><br><span class="line">    <span class="keyword">if</span> self._connection_routine:                         <span class="comment"># 验证当前是否存在异步通信线程/协程</span></span><br><span class="line">        <span class="keyword">raise</span> Exception(<span class="string">"Unable to start, connection routine already "</span></span><br><span class="line">                        <span class="string">"active."</span>)</span><br><span class="line">    self._connection_routine = self.handler.spawn(self.zk_loop)</span><br><span class="line">                                                         <span class="comment"># 启动一个异步通信线程/协程 </span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ....</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">zk_loop</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""Main Zookeeper handling loop"""</span></span><br><span class="line">    self.logger.log(BLATHER, <span class="string">'ZK loop started'</span>)</span><br><span class="line"></span><br><span class="line">    self.connection_stopped.clear()</span><br><span class="line"></span><br><span class="line">    retry = self.retry_sleeper.copy()                   <span class="comment"># 获取client的retry方法</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">not</span> self.client._stopped.is_set():        <span class="comment"># 注意，轮询不是靠这个while进行的，而是靠下面的retry</span></span><br><span class="line">            <span class="comment"># If the connect_loop returns STOP_CONNECTING, stop retrying</span></span><br><span class="line">            <span class="keyword">if</span> retry(self._connect_loop, retry) <span class="keyword">is</span> STOP_CONNECTING:         <span class="comment"># 主要功能函数，连接轮询，处理请求和反馈</span></span><br><span class="line">                <span class="keyword">break</span>                                                       <span class="comment"># 默认只会retry 1次</span></span><br><span class="line">    <span class="keyword">except</span> RetryFailedError:</span><br><span class="line">        self.logger.warning(<span class="string">"Failed connecting to Zookeeper "</span></span><br><span class="line">                            <span class="string">"within the connection retry policy."</span>)</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        self.connection_stopped.set()</span><br><span class="line">        self.client._session_callback(KeeperState.CLOSED)</span><br><span class="line">        self.logger.log(BLATHER, <span class="string">'Connection stopped'</span>)  </span><br><span class="line"><span class="comment"># ...</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_connect_loop</span><span class="params">(self, retry)</span>:</span></span><br><span class="line">    <span class="comment"># Iterate through the hosts a full cycle before starting over</span></span><br><span class="line">    status = <span class="keyword">None</span></span><br><span class="line">    host_ports = self._expand_client_hosts()        <span class="comment"># 获取 zk_server list</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Check for an empty hostlist, indicating none resolved</span></span><br><span class="line">    <span class="keyword">if</span> len(host_ports) == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> STOP_CONNECTING</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> host, hostip, port <span class="keyword">in</span> host_ports:           <span class="comment"># 对于每个 zk_server，轮询尝试建立连接</span></span><br><span class="line">        <span class="keyword">if</span> self.client._stopped.is_set():</span><br><span class="line">            status = STOP_CONNECTING</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        status = self._connect_attempt(host, hostip, port, retry)   <span class="comment"># 处理request和response的主体函数</span></span><br><span class="line">        <span class="keyword">if</span> status <span class="keyword">is</span> STOP_CONNECTING:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> status <span class="keyword">is</span> STOP_CONNECTING:                   <span class="comment"># 如果当前连接断掉，则返回</span></span><br><span class="line">        <span class="keyword">return</span> STOP_CONNECTING</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">raise</span> ForceRetryError(<span class="string">'Reconnecting'</span>)       <span class="comment"># 抛出异常，强行触发上层的retry，实现轮询</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到，connection调用start()启动之后，进行了3步主要操作：</p>
+<ol>
+<li>生成一个 socket_pair；</li>
+<li>验证当前是否已经有异步结构，如果有，则抛出异常并退出；</li>
+<li>通过client的异步handler.spawn()生成一个异步线程，然后通过zk_loop函数与ZK Server进行通信。</li>
+</ol>
+<p>在zk_loop函数中，通过while循环进行轮询，通过_connect_loop处理请求信息。默认retry只会重试1次，重试之前会默认sleep一个随机时间。</p>
+<p>在_connect_loop函数中，拿到zk_server的host list，并通过_connect_attempt函数，逐一尝试建立连接。_connect_attempt函数中会进行如下操作：</p>
+<ol>
+<li>收集当前命令，通过写socket发送请求给ZK Server；</li>
+<li>如果当前没有命令，发送一个ping过去，保持连接活性；</li>
+<li>通过_read_socket函数，从读socket接受response；</li>
+<li>在_read_socket函数中，把返回值写入异步结果AsyncResult，如果返回值中存在watch，则调用相应的callback。</li>
+</ol>
+<p>关于connection机制的介绍，可参考引用[3]，介绍的很详细。</p>
+<h4 id="Handler"><a href="#Handler" class="headerlink" title="Handler"></a>Handler</h4><p>Kazoo使用handler来进行异步操作，提供了3种异步操作的handler：SequentialThreadingHandler、SequentialGeventHandler、SequentialEventletHandler，分别用线程、gevent、eventlet的方式来实现异步。</p>
+<p>由于默认使用SequentialThreadingHandler提供异步方案，我们以SequentialThreadingHandler来进行分析。</p>
+<p>先看看handler提供的函数接口：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""Start the worker threads."""</span></span><br><span class="line">    <span class="comment"># 代码略</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">stop</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""Stop the worker threads and empty all queues."""</span></span><br><span class="line">    <span class="comment"># 代码略</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">select</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="comment"># if we have epoll, and select is not expected to work</span></span><br><span class="line">    <span class="comment"># use an epoll-based "select". Otherwise don't touch</span></span><br><span class="line">    <span class="comment"># anything to minimize changes</span></span><br><span class="line">    <span class="comment"># 代码略</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">socket</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> utils.create_tcp_socket(socket)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_connection</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> utils.create_tcp_connection(socket, *args, **kwargs)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_socket_pair</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> utils.create_socket_pair(socket)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">event_object</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""Create an appropriate Event object"""</span></span><br><span class="line">    <span class="keyword">return</span> threading.Event()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">lock_object</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""Create a lock object"""</span></span><br><span class="line">    <span class="keyword">return</span> threading.Lock()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">rlock_object</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""Create an appropriate RLock object"""</span></span><br><span class="line">    <span class="keyword">return</span> threading.RLock()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">async_result</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""Create a :class:`AsyncResult` instance"""</span></span><br><span class="line">    <span class="keyword">return</span> AsyncResult(self)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">spawn</span><span class="params">(self, func, *args, **kwargs)</span>:</span></span><br><span class="line">    t = threading.Thread(target=func, args=args, kwargs=kwargs)</span><br><span class="line">    t.daemon = <span class="keyword">True</span></span><br><span class="line">    t.start()</span><br><span class="line">    <span class="keyword">return</span> t</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dispatch_callback</span><span class="params">(self, callback)</span>:</span></span><br><span class="line">    <span class="string">"""Dispatch to the callback object</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    The callback is put on separate queues to run depending on the</span></span><br><span class="line"><span class="string">    type as documented for the :class:`SequentialThreadingHandler`.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    self.callback_queue.put(<span class="keyword">lambda</span>: callback.func(*callback.args))</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li><p><strong>spawn() 函数</strong><br>这些函数接口中，最重要的函数是spawn()，它经常在各处被调用，用于提供异步的功能。具体在SequentialThreadingHandler中，spawn()会调用python的threading模块，生成一个线程，并将线程设置为守护线程。</p>
+</li>
+<li><p><strong>start() 函数</strong><br>kazoo客户端初始化后会调用start()函数，启动异步。在SequentialThreadingHandler中，start()函数会初始化2个队列，并为其各自生成一个线程进行消费：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="string">"""Start the worker threads."""</span></span><br><span class="line">    <span class="keyword">with</span> self._state_change:</span><br><span class="line">        <span class="keyword">if</span> self._running:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># Spawn our worker threads, we have</span></span><br><span class="line">        <span class="comment"># - A callback worker for watch events to be called         用于唤醒callback</span></span><br><span class="line">        <span class="comment"># - A completion worker for completion events to be called  用于设置异步结果AsyncResult的值</span></span><br><span class="line">        <span class="keyword">for</span> queue <span class="keyword">in</span> (self.completion_queue, self.callback_queue):   </span><br><span class="line">            w = self._create_thread_worker(queue)                 <span class="comment"># 此处将调用_create_thread_worker生成2个worker，持续消费队列</span></span><br><span class="line">            self._workers.append(w)</span><br><span class="line">        self._running = <span class="keyword">True</span></span><br><span class="line">        python2atexit.register(self.stop)</span><br><span class="line">        </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_create_thread_worker</span><span class="params">(self, queue)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_thread_worker</span><span class="params">()</span>:</span>  <span class="comment"># pragma: nocover    消费队列的函数</span></span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                func = queue.get()</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    <span class="keyword">if</span> func <span class="keyword">is</span> _STOP:</span><br><span class="line">                        <span class="keyword">break</span></span><br><span class="line">                    func()</span><br><span class="line">                <span class="keyword">except</span> Exception:</span><br><span class="line">                    log.exception(<span class="string">"Exception in worker queue thread"</span>)</span><br><span class="line">                <span class="keyword">finally</span>:</span><br><span class="line">                    queue.task_done()</span><br><span class="line">                    <span class="keyword">del</span> func  <span class="comment"># release before possible idle</span></span><br><span class="line">            <span class="keyword">except</span> self.queue_empty:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">    t = self.spawn(_thread_worker)          <span class="comment"># 生成消费队列的线程</span></span><br><span class="line">    <span class="keyword">return</span> t</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>event_object() 函数</strong><br>生成一个锁，用在并发安全控制。由于需要考虑在gevent/eventlet并发模型下的锁控制，所以将锁生成抽象到handler来处理。在SequentialThreadingHandler中直接返回threading.Event()。</p>
+</li>
+</ol>
+<h4 id="Watch"><a href="#Watch" class="headerlink" title="Watch"></a>Watch</h4><p>Kazoo提供了2种watch的方式，我们分别介绍其原理。</p>
+<ol>
+<li>Default watch<br>该方式通过将watch的回调函数作为参数，传递给get()、get_children()和exists()接口完成watch的功能。<br>以get()为例，通过源码，可以看到get()函数的操作流程如下：<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get</span><span class="params">(self, path, watch=None)</span>:</span></span><br><span class="line">    <span class="string">"""Get the value of a node.</span></span><br><span class="line"><span class="string">       .. (the doc) ..</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">return</span> self.get_async(path, watch=watch).get()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_async</span><span class="params">(self, path, watch=None)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">       .. (the doc) ..</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> isinstance(path, string_types):      <span class="comment"># 进行参数类型校验</span></span><br><span class="line">        <span class="keyword">raise</span> TypeError(<span class="string">"Invalid type for 'path' (string expected)"</span>)</span><br><span class="line">    <span class="keyword">if</span> watch <span class="keyword">and</span> <span class="keyword">not</span> callable(watch):</span><br><span class="line">        <span class="keyword">raise</span> TypeError(<span class="string">"Invalid type for 'watch' (must be a callable)"</span>)</span><br><span class="line"></span><br><span class="line">    async_result = self.handler.async_result()</span><br><span class="line">    self._call(GetData(_prefix_root(self.chroot, path), watch),     <span class="comment"># GetData 会将get请求序列化成命令，用于与ZK Server直接通信</span></span><br><span class="line">               async_result)</span><br><span class="line">    <span class="keyword">return</span> async_result</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>实际上，watch的步骤如下：</p>
+<pre><code>1. get()会调用get_async()，将参数和回调函数watcher传递过去；   
+2. 而get_async()函数会将get命令与watcher封装，通过_call()函数放入自身的请求队列；
+3. 后面的流程一分为二：一方面，序列化的命令会将watch的标志位置为1，而在处理请求的时候watcher函数会被放到client的watcher中；
+4. 当读到的请求发回一个需要唤醒watcher的路径时，会调用client中对应的watcher，执行回调函数。
+</code></pre><ol start="2">
+<li>Decorator watch<br>Kazoo提供了2个watch装饰器，使用装饰器可以达到一次watch永远生效的作用。一般情况下ZooKeeper的watch事件只会生效1次，可以想象，这里其实只是一个语法糖：在初始化装饰器时注册一次watch，当触发watch事件后，再注册同样的watch即可。<br>原理很简单，但是具体的实现还是有学习价值的。以DataWatch为例：<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, client, path, func=None, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    <span class="comment"># 篇幅有限，此处省略了很多文档和代码</span></span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    <span class="keyword">if</span> func <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">        self._used = <span class="keyword">True</span></span><br><span class="line">        self._client.add_listener(self._session_watcher)    <span class="comment"># 注册session listener，当状态改变时触发，下同</span></span><br><span class="line">        self._get_data()                <span class="comment"># 获取数据</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, func)</span>:</span></span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    <span class="comment"># 篇幅有限，此处省略了很多文档和代码</span></span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    self._client.add_listener(self._session_watcher)</span><br><span class="line">    self._get_data()</span><br><span class="line">    <span class="keyword">return</span> func</span><br><span class="line">    </span><br><span class="line"><span class="meta">@_ignore_closed</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_data</span><span class="params">(self, event=None)</span>:</span></span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    <span class="comment"># 篇幅有限，此处省略了很多文档和代码</span></span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data, stat = self._retry(self._client.get,</span><br><span class="line">                                 self._path, self._watcher)     <span class="comment"># 通过retry，调用get命令，并将watcher注册</span></span><br><span class="line">    <span class="keyword">except</span> NoNodeError:</span><br><span class="line">        data = <span class="keyword">None</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># This will set 'stat' to None if the node does not yet</span></span><br><span class="line">        <span class="comment"># exist.</span></span><br><span class="line">        stat = self._retry(self._client.exists, self._path,     <span class="comment"># 如果当前node不存在，会先尝试watch节点</span></span><br><span class="line">                           self._watcher)                       <span class="comment"># 然后生成一个异步结构来持续监听节点data变化</span></span><br><span class="line">        <span class="keyword">if</span> stat:</span><br><span class="line">            self._client.handler.spawn(self._get_data)</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    <span class="comment"># 码多不看</span></span><br><span class="line">    <span class="comment"># ...</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="通信流程"><a href="#通信流程" class="headerlink" title="通信流程"></a>通信流程</h4><p>至此，kazoo的主要模块介绍完毕。下面通过一个get()命令的执行顺序，将kazoo工作机制展现出来。不多说，上图：<br><img src="/images/blog/python/kazoo_invoke_flow.png" alt="image" title="get请求流程(图中蓝色为同步过程，红色为异步过程)"></p>
+<h3 id="Annotations-amp-References"><a href="#Annotations-amp-References" class="headerlink" title=" Annotations &amp; References: "></a><em><strong> Annotations &amp; References: </strong></em></h3><p>[1] <a href="https://cwiki.apache.org/confluence/display/ZOOKEEPER/ZKClientBindings" target="_blank" rel="noopener">ZKClient Bindings</a><br>[2] <a href="https://kazoo.readthedocs.io/en/latest/" target="_blank" rel="noopener">Kazoo Official</a><br>[3] <a href="https://www.cnblogs.com/cloud-zhao/p/5688619.html" target="_blank" rel="noopener">zookeeper client API实现(python kazoo 的实现)</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/ZooKeeper/" rel="tag"># ZooKeeper</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/04/常见Web攻击（2）—— 跨站点请求伪造/" rel="next" title="常见Web攻击（2）—— 跨站点请求伪造">
+                <i class="fa fa-chevron-left"></i> 常见Web攻击（2）—— 跨站点请求伪造
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/15/【算法】买卖股票的最佳时间系列问题/" rel="prev" title="【算法】买卖股票的最佳时间系列问题">
+                【算法】买卖股票的最佳时间系列问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/uploads/sadaharu.jpg" alt="流云">
+            
+              <p class="site-author-name" itemprop="name">流云</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于Kazoo"><span class="nav-number">1.</span> <span class="nav-text">关于Kazoo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于本文"><span class="nav-number">2.</span> <span class="nav-text">关于本文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本使用方式"><span class="nav-number">3.</span> <span class="nav-text">基本使用方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kazoo-状态转换"><span class="nav-number">4.</span> <span class="nav-text">Kazoo 状态转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kazoo-代码原理浅析"><span class="nav-number">5.</span> <span class="nav-text">Kazoo 代码原理浅析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#模块架构"><span class="nav-number">5.1.</span> <span class="nav-text">模块架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Connection"><span class="nav-number">5.2.</span> <span class="nav-text">Connection</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Handler"><span class="nav-number">5.3.</span> <span class="nav-text">Handler</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Watch"><span class="nav-number">5.4.</span> <span class="nav-text">Watch</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通信流程"><span class="nav-number">5.5.</span> <span class="nav-text">通信流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Annotations-amp-References"><span class="nav-number">6.</span> <span class="nav-text"> Annotations &amp; References: </span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">流云</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://flowingcloud516.github.io/2019/08/04/Kazoo基本使用和原理浅析/';
+          this.page.identifier = '2019/08/04/Kazoo基本使用和原理浅析/';
+          this.page.title = 'Kazoo基本使用和原理浅析';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://flowingcloud516.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("k8BXQFr62egK9QiKCbkKXwY2-gzGzoHsz", "AnYv9GdhoosYmbVMlP7FONam");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/exturl.js?v=5.1.4"></script>
+
+
+</body>
+</html>
